@@ -24,13 +24,14 @@ import {
 import type { Event } from "@/lib/api/types";
 
 const schema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, "El título es obligatorio"),
   description: z.string().optional(),
-  startAt: z.string().min(1, "Start date is required"),
+  startAt: z.string().min(1, "La fecha de inicio es obligatoria"),
   endAt: z.string().optional(),
   location: z.string().optional(),
+  imageUrl: z.string().url("URL inválida").optional().or(z.literal("")),
   allDay: z.boolean().optional(),
-  status: z.enum(["SCHEDULED", "CANCELLED", "COMPLETED"]).optional(),
+  status: z.enum(["PROXIMO", "FINALIZADO"]).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -62,6 +63,7 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
       startAt: toDatetimeLocal(event?.startAt),
       endAt: toDatetimeLocal(event?.endAt),
       location: event?.location ?? "",
+      imageUrl: event?.imageUrl ?? "",
       allDay: event?.allDay ?? false,
       status: event?.status,
     },
@@ -70,6 +72,7 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
   function handleSubmit(values: FormValues) {
     onSubmit({
       ...values,
+      imageUrl: values.imageUrl || undefined,
       startAt: toIsoWithOffset(values.startAt) ?? values.startAt,
       endAt: toIsoWithOffset(values.endAt),
     });
@@ -83,9 +86,9 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Título</FormLabel>
               <FormControl>
-                <Input placeholder="Event title" {...field} />
+                <Input placeholder="Nombre del evento" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,9 +100,9 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Descripción</FormLabel>
               <FormControl>
-                <Input placeholder="Optional description" {...field} />
+                <Input placeholder="Descripción opcional" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -112,7 +115,7 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
             name="startAt"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start</FormLabel>
+                <FormLabel>Inicio</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" {...field} />
                 </FormControl>
@@ -126,7 +129,7 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
             name="endAt"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End (optional)</FormLabel>
+                <FormLabel>Fin (opcional)</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" {...field} />
                 </FormControl>
@@ -141,9 +144,23 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
+              <FormLabel>Lugar</FormLabel>
               <FormControl>
-                <Input placeholder="Club, venue, city..." {...field} />
+                <Input placeholder="Club, venue, ciudad..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Imagen (URL)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -156,17 +173,16 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>Estado</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                    <SelectItem value="COMPLETED">Completed</SelectItem>
-                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    <SelectItem value="PROXIMO">Próximo</SelectItem>
+                    <SelectItem value="FINALIZADO">Finalizado</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -176,7 +192,7 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
         )}
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Saving..." : event ? "Update event" : "Create event"}
+          {isLoading ? "Guardando..." : event ? "Actualizar evento" : "Crear evento"}
         </Button>
       </form>
     </Form>

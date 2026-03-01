@@ -1,6 +1,7 @@
 "use client";
 
 import { parseISO, format } from "date-fns";
+import { es } from "date-fns/locale";
 import { EventCard } from "@/components/event-card";
 import type { Event } from "@/lib/api/types";
 
@@ -19,7 +20,7 @@ function groupByMonth(events: Event[]): { label: string; events: Event[] }[] {
   }
 
   return Array.from(map.entries()).map(([key, evs]) => ({
-    label: format(parseISO(`${key}-01`), "MMMM yyyy"),
+    label: format(parseISO(`${key}-01`), "MMMM yyyy", { locale: es }),
     events: evs.sort(
       (a, b) => parseISO(a.startAt).getTime() - parseISO(b.startAt).getTime()
     ),
@@ -32,7 +33,7 @@ export function EventsByMonth({ events, onSelect }: Props) {
   if (grouped.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-white/30 text-sm">No upcoming events</p>
+        <p className="text-white/30 text-sm">No hay eventos próximos</p>
       </div>
     );
   }

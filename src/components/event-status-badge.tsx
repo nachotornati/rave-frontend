@@ -2,9 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import type { EventStatus } from "@/lib/api/types";
 
 const variants: Record<EventStatus, { label: string; className: string }> = {
-  SCHEDULED: { label: "Scheduled", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  COMPLETED: { label: "Completed", className: "bg-green-500/20 text-green-400 border-green-500/30" },
-  CANCELLED: { label: "Cancelled", className: "bg-red-500/20 text-red-400 border-red-500/30" },
+  PROXIMO: { label: "Próximo", className: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
+  FINALIZADO: { label: "Finalizado", className: "bg-white/10 text-white/50 border-white/20" },
 };
 
 export function EventStatusBadge({ status }: { status: EventStatus }) {

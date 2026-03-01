@@ -1,8 +1,4 @@
-// Auto-generated from openapi.yaml
-
-export type EventStatus = "SCHEDULED" | "CANCELLED" | "COMPLETED";
-
-export type ReminderType = "EMAIL" | "PUSH";
+export type EventStatus = "PROXIMO" | "FINALIZADO";
 
 export interface Event {
   id: string;
@@ -11,6 +7,7 @@ export interface Event {
   startAt: string;
   endAt?: string | null;
   location?: string | null;
+  imageUrl?: string | null;
   allDay: boolean;
   status: EventStatus;
   createdAt: string;
@@ -23,6 +20,7 @@ export interface CreateEventRequest {
   startAt: string;
   endAt?: string | null;
   location?: string | null;
+  imageUrl?: string | null;
   allDay?: boolean;
 }
 
@@ -32,22 +30,9 @@ export interface UpdateEventRequest {
   startAt?: string;
   endAt?: string | null;
   location?: string | null;
+  imageUrl?: string | null;
   allDay?: boolean;
   status?: EventStatus;
-}
-
-export interface Reminder {
-  id: string;
-  eventId: string;
-  minutesBefore: number;
-  type: ReminderType;
-  sent: boolean;
-  createdAt: string;
-}
-
-export interface CreateReminderRequest {
-  minutesBefore: number;
-  type: ReminderType;
 }
 
 export interface ListEventsParams {
