@@ -6,8 +6,10 @@ const variants: Record<EventStatus, { label: string; className: string }> = {
   FINALIZADO: { label: "Finalizado", className: "bg-white/10 text-white/50 border-white/20" },
 };
 
+const fallback = { label: "Próximo", className: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
+
 export function EventStatusBadge({ status }: { status: EventStatus }) {
-  const { label, className } = variants[status];
+  const { label, className } = variants[status] ?? fallback;
   return (
     <Badge variant="outline" className={className}>
       {label}
