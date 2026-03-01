@@ -16,11 +16,28 @@ export default function PublicPage() {
   });
 
   const cities = useMemo(() => {
+    const CITY_ORDER = [
+      "Buenos Aires",
+      "Córdoba",
+      "Mendoza",
+      "Rosario",
+      "Santa Fe",
+      "Costa Argentina",
+      "Bahía Blanca",
+      "Provincia de Mendoza",
+    ];
     const set = new Set<string>();
     for (const e of events) {
       if (e.city) set.add(e.city);
     }
-    return Array.from(set).sort();
+    return Array.from(set).sort((a, b) => {
+      const ia = CITY_ORDER.indexOf(a);
+      const ib = CITY_ORDER.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b, "es");
+    });
   }, [events]);
 
   const filteredEvents = useMemo(
