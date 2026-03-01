@@ -7,6 +7,8 @@ export interface Event {
   startAt: string;
   endAt?: string | null;
   location?: string | null;
+  city?: string | null;
+  externalId?: string | null;
   imageUrl?: string | null;
   allDay: boolean;
   status: EventStatus;
@@ -20,6 +22,8 @@ export interface CreateEventRequest {
   startAt: string;
   endAt?: string | null;
   location?: string | null;
+  city?: string | null;
+  externalId?: string | null;
   imageUrl?: string | null;
   allDay?: boolean;
 }
@@ -30,6 +34,7 @@ export interface UpdateEventRequest {
   startAt?: string;
   endAt?: string | null;
   location?: string | null;
+  city?: string | null;
   imageUrl?: string | null;
   allDay?: boolean;
 }
@@ -38,4 +43,5 @@ export interface ListEventsParams {
   from?: string;
   to?: string;
   status?: EventStatus;
+  city?: string;
 }

@@ -23,6 +23,7 @@ const schema = z.object({
   startAt: z.string().min(1, "La fecha de inicio es obligatoria"),
   endAt: z.string().optional(),
   location: z.string().optional(),
+  city: z.string().optional(),
   imageUrl: z.string().url("URL inválida").optional().or(z.literal("")),
   allDay: z.boolean().optional(),
 });
@@ -59,6 +60,7 @@ export function EventForm({ event, onSubmit, isLoading }: Props) {
       startAt: toDatetimeLocal(event?.startAt) || defaultStartAt(),
       endAt: toDatetimeLocal(event?.endAt),
       location: event?.location ?? "",
+      city: event?.city ?? "",
       imageUrl: event?.imageUrl ?? "",
       allDay: event?.allDay ?? false,
     },
@@ -144,6 +146,20 @@ export function EventForm({ event, onSubmit, isLoading }: Props) {
               <FormLabel>Lugar</FormLabel>
               <FormControl>
                 <Input placeholder="Club, venue, ciudad..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ciudad</FormLabel>
+              <FormControl>
+                <Input placeholder="Buenos Aires, Córdoba..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
