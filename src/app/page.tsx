@@ -12,7 +12,6 @@ export default function PublicPage() {
 
   const { data: events = [], isLoading } = useEvents({
     from: startOfDay(new Date()).toISOString(),
-    status: "PROXIMO",
   });
 
   return (
