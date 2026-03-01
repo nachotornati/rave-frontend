@@ -97,7 +97,7 @@ export default function PublicPage() {
       .sort()
       .map((key) => ({
         value: key,
-        label: format(parseISO(`${key}-01`), "MMM", { locale: es }),
+        label: format(parseISO(`${key}-01`), "MMMM", { locale: es }).toUpperCase(),
       }));
   }, [events]);
 
@@ -148,7 +148,11 @@ export default function PublicPage() {
             ))}
           </div>
         ) : (
-          <EventsByMonth events={filteredEvents} onSelect={setSelected} />
+          <EventsByMonth
+            events={filteredEvents}
+            onSelect={setSelected}
+            forceCurrentMonth={monthFilter === null}
+          />
         )}
       </main>
 

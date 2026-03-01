@@ -9,14 +9,16 @@ import type { Event } from "@/lib/api/types";
 interface Props {
   events: Event[];
   onSelect?: (event: Event) => void;
+  forceCurrentMonth?: boolean;
 }
 
-function groupByMonth(events: Event[]): { key: string; label: string; events: Event[] }[] {
+function groupByMonth(events: Event[], forceCurrentMonth: boolean): { key: string; label: string; events: Event[] }[] {
   const map = new Map<string, Event[]>();
 
-  // Always include the current month
-  const currentKey = format(new Date(), "yyyy-MM");
-  map.set(currentKey, []);
+  if (forceCurrentMonth) {
+    const currentKey = format(new Date(), "yyyy-MM");
+    map.set(currentKey, []);
+  }
 
   for (const event of events) {
     const key = format(parseISO(event.startAt), "yyyy-MM");
@@ -35,8 +37,8 @@ function groupByMonth(events: Event[]): { key: string; label: string; events: Ev
     }));
 }
 
-export function EventsByMonth({ events, onSelect }: Props) {
-  const grouped = groupByMonth(events);
+export function EventsByMonth({ events, onSelect, forceCurrentMonth = true }: Props) {
+  const grouped = groupByMonth(events, forceCurrentMonth);
   const nearestRef = useRef<HTMLDivElement>(null);
 
   // First upcoming event from now
