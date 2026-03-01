@@ -32,7 +32,6 @@ export interface UpdateEventRequest {
   location?: string | null;
   imageUrl?: string | null;
   allDay?: boolean;
-  status?: EventStatus;
 }
 
 export interface ListEventsParams {

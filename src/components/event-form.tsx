@@ -14,13 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DateTimePicker } from "@/components/date-time-picker";
 import type { Event } from "@/lib/api/types";
 
 const schema = z.object({
@@ -31,7 +25,6 @@ const schema = z.object({
   location: z.string().optional(),
   imageUrl: z.string().url("URL inválida").optional().or(z.literal("")),
   allDay: z.boolean().optional(),
-  status: z.enum(["PROXIMO", "FINALIZADO"]).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -40,12 +33,15 @@ interface Props {
   event?: Event;
   onSubmit: (values: FormValues) => void;
   isLoading?: boolean;
-  showStatus?: boolean;
 }
 
 function toDatetimeLocal(iso?: string | null): string {
   if (!iso) return "";
   return format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
+}
+
+function defaultStartAt(): string {
+  return format(new Date(), "yyyy-MM-dd'T'20:00");
 }
 
 // datetime-local gives "2026-03-15T20:00" — backend needs OffsetDateTime ("2026-03-15T20:00:00Z")
@@ -54,18 +50,17 @@ function toIsoWithOffset(local?: string): string | undefined {
   return new Date(local).toISOString();
 }
 
-export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
+export function EventForm({ event, onSubmit, isLoading }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: event?.title ?? "",
       description: event?.description ?? "",
-      startAt: toDatetimeLocal(event?.startAt),
+      startAt: toDatetimeLocal(event?.startAt) || defaultStartAt(),
       endAt: toDatetimeLocal(event?.endAt),
       location: event?.location ?? "",
       imageUrl: event?.imageUrl ?? "",
       allDay: event?.allDay ?? false,
-      status: event?.status,
     },
   });
 
@@ -109,35 +104,37 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="startAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Inicio</FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="startAt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Inicio</FormLabel>
+              <FormControl>
+                <DateTimePicker value={field.value} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="endAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fin (opcional)</FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="endAt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fin (opcional)</FormLabel>
+              <FormControl>
+                <DateTimePicker
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  placeholder="Sin fecha de fin"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -166,30 +163,6 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
             </FormItem>
           )}
         />
-
-        {showStatus && (
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estado</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="PROXIMO">Próximo</SelectItem>
-                    <SelectItem value="FINALIZADO">Finalizado</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Guardando..." : event ? "Actualizar evento" : "Crear evento"}

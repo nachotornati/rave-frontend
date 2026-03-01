@@ -12,7 +12,7 @@ export default function PublicPage() {
 
   const { data: events = [], isLoading } = useEvents({
     from: startOfDay(new Date()).toISOString(),
-    status: "SCHEDULED",
+    status: "PROXIMO",
   });
 
   return (
@@ -22,7 +22,7 @@ export default function PublicPage() {
         <div className="mx-auto flex max-w-xl items-center justify-between px-4 py-4">
           <div>
             <h1 className="text-lg font-bold tracking-tight">Rave Agenda</h1>
-            <p className="text-xs text-white/40">Electronic music events</p>
+            <p className="text-xs text-white/40">Eventos de música electrónica</p>
           </div>
         </div>
       </header>

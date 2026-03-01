@@ -99,7 +99,6 @@ export default function AdminPage() {
           {editingEvent && (
             <EventForm
               event={editingEvent}
-              showStatus
               onSubmit={handleUpdate}
               isLoading={updateEvent.isPending}
             />
