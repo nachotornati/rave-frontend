@@ -23,26 +23,14 @@ function FilterChips({
   options,
   value,
   onChange,
-  allLabel,
 }: {
   options: { value: string; label: string }[];
   value: string | null;
   onChange: (v: string | null) => void;
-  allLabel: string;
 }) {
   if (options.length === 0) return null;
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-      <button
-        onClick={() => onChange(null)}
-        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-          value === null
-            ? "bg-white text-black"
-            : "bg-white/10 text-white/60 hover:bg-white/20"
-        }`}
-      >
-        {allLabel}
-      </button>
       {options.map((o) => (
         <button
           key={o.value}
@@ -97,7 +85,7 @@ export default function PublicPage() {
       .sort()
       .map((key) => ({
         value: key,
-        label: format(parseISO(`${key}-01`), "MMMM", { locale: es }).toUpperCase(),
+        label: format(parseISO(`${key}-01`), "MMMM", { locale: es }).replace(/^\w/, (c) => c.toUpperCase()),
       }));
   }, [events]);
 
@@ -127,13 +115,11 @@ export default function PublicPage() {
               options={cityOptions}
               value={cityFilter}
               onChange={setCityFilter}
-              allLabel="Todas"
             />
             <FilterChips
               options={monthOptions}
               value={monthFilter}
               onChange={setMonthFilter}
-              allLabel="Todos"
             />
           </div>
         </div>
