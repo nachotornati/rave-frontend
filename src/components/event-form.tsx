@@ -47,6 +47,12 @@ function toDatetimeLocal(iso?: string | null): string {
   return format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
 }
 
+// datetime-local gives "2026-03-15T20:00" — backend needs OffsetDateTime ("2026-03-15T20:00:00Z")
+function toIsoWithOffset(local?: string): string | undefined {
+  if (!local) return undefined;
+  return new Date(local).toISOString();
+}
+
 export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -61,9 +67,17 @@ export function EventForm({ event, onSubmit, isLoading, showStatus }: Props) {
     },
   });
 
+  function handleSubmit(values: FormValues) {
+    onSubmit({
+      ...values,
+      startAt: toIsoWithOffset(values.startAt) ?? values.startAt,
+      endAt: toIsoWithOffset(values.endAt),
+    });
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
