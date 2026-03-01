@@ -1,48 +1,114 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { startOfDay } from "date-fns";
+import { startOfDay, format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 import { EventsByMonth } from "@/components/events-by-month";
 import { EventPublicSheet } from "@/components/event-public-sheet";
 import { useEvents } from "@/lib/api/hooks";
 import type { Event } from "@/lib/api/types";
 
+const CITY_ORDER = [
+  "Buenos Aires",
+  "Córdoba",
+  "Mendoza",
+  "Rosario",
+  "Santa Fe",
+  "Costa Argentina",
+  "Bahía Blanca",
+  "Provincia de Mendoza",
+];
+
+function FilterChips({
+  options,
+  value,
+  onChange,
+  allLabel,
+}: {
+  options: { value: string; label: string }[];
+  value: string | null;
+  onChange: (v: string | null) => void;
+  allLabel: string;
+}) {
+  if (options.length === 0) return null;
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <button
+        onClick={() => onChange(null)}
+        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+          value === null
+            ? "bg-white text-black"
+            : "bg-white/10 text-white/60 hover:bg-white/20"
+        }`}
+      >
+        {allLabel}
+      </button>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          onClick={() => onChange(o.value === value ? null : o.value)}
+          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            value === o.value
+              ? "bg-white text-black"
+              : "bg-white/10 text-white/60 hover:bg-white/20"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function PublicPage() {
   const [selected, setSelected] = useState<Event | null>(null);
   const [cityFilter, setCityFilter] = useState<string | null>(null);
+  const [monthFilter, setMonthFilter] = useState<string | null>(null);
 
   const { data: events = [], isLoading } = useEvents({
     from: startOfDay(new Date()).toISOString(),
   });
 
-  const cities = useMemo(() => {
-    const CITY_ORDER = [
-      "Buenos Aires",
-      "Córdoba",
-      "Mendoza",
-      "Rosario",
-      "Santa Fe",
-      "Costa Argentina",
-      "Bahía Blanca",
-      "Provincia de Mendoza",
-    ];
+  const cityOptions = useMemo(() => {
     const set = new Set<string>();
     for (const e of events) {
       if (e.city) set.add(e.city);
     }
-    return Array.from(set).sort((a, b) => {
-      const ia = CITY_ORDER.indexOf(a);
-      const ib = CITY_ORDER.indexOf(b);
-      if (ia !== -1 && ib !== -1) return ia - ib;
-      if (ia !== -1) return -1;
-      if (ib !== -1) return 1;
-      return a.localeCompare(b, "es");
-    });
+    return Array.from(set)
+      .sort((a, b) => {
+        const ia = CITY_ORDER.indexOf(a);
+        const ib = CITY_ORDER.indexOf(b);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a.localeCompare(b, "es");
+      })
+      .map((c) => ({ value: c, label: c }));
+  }, [events]);
+
+  const monthOptions = useMemo(() => {
+    const seen = new Set<string>();
+    for (const e of events) {
+      seen.add(format(parseISO(e.startAt), "yyyy-MM"));
+    }
+    // Always include current month
+    seen.add(format(new Date(), "yyyy-MM"));
+    return Array.from(seen)
+      .sort()
+      .map((key) => ({
+        value: key,
+        label: format(parseISO(`${key}-01`), "MMM", { locale: es }),
+      }));
   }, [events]);
 
   const filteredEvents = useMemo(
-    () => (cityFilter ? events.filter((e) => e.city === cityFilter) : events),
-    [events, cityFilter]
+    () =>
+      events.filter((e) => {
+        if (cityFilter && e.city !== cityFilter) return false;
+        if (monthFilter && format(parseISO(e.startAt), "yyyy-MM") !== monthFilter) return false;
+        return true;
+      }),
+    [events, cityFilter, monthFilter]
   );
 
   return (
@@ -56,34 +122,20 @@ export default function PublicPage() {
               <p className="text-xs text-white/40">Eventos de música electrónica</p>
             </div>
           </div>
-          {/* City filter chips */}
-          {cities.length > 0 && (
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              <button
-                onClick={() => setCityFilter(null)}
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  cityFilter === null
-                    ? "bg-white text-black"
-                    : "bg-white/10 text-white/60 hover:bg-white/20"
-                }`}
-              >
-                Todas
-              </button>
-              {cities.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCityFilter(c === cityFilter ? null : c)}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    cityFilter === c
-                      ? "bg-white text-black"
-                      : "bg-white/10 text-white/60 hover:bg-white/20"
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="mt-3 space-y-2">
+            <FilterChips
+              options={cityOptions}
+              value={cityFilter}
+              onChange={setCityFilter}
+              allLabel="Todas"
+            />
+            <FilterChips
+              options={monthOptions}
+              value={monthFilter}
+              onChange={setMonthFilter}
+              allLabel="Todos"
+            />
+          </div>
         </div>
       </header>
 
